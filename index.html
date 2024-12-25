@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>grub</title>
+    <link rel="stylesheet" href="particles.css">
+    <style>
+        body {
+            font-family: monospace;
+            background-color: #2e2e2e;
+            color: #f5f5f5;
+            padding: 20px;
+            margin: 0;
+            overflow-x: hidden;
+            position: relative;
+        }
+        pre {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: left;
+            margin-left: 0;
+            filter: blur(5px);
+        }
+        code {
+            color: #e6e6e6;
+        }
+        .mouse-particle {
+            position: absolute;
+            pointer-events: none;
+            width: 8px;
+            height: 8px;
+            background-color: white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .blur-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-size: 24px;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 0.5s;
+        }
+        .new-container {
+            background-color: #1e1e1e;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 8px;
+            color: #fff;
+            text-align: center;
+            filter: blur(5px);
+            cursor: pointer;
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .draggable {
+            width: 100%;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+</head>
+<body>
+    <div id="blur-overlay" class="blur-overlay">Click anywhere</div>
+    <div class="animation-wrapper">
+        <div class="particle particle-1"></div>
+    </div>
+    <pre><code id="json-output"></code></pre>
+    <div class="new-container" id="draggable-bar">
+        <div class="draggable">CRAZY</div>
+    </div>
+    <audio id="audio-player" src="crazy.mp3" preload="auto"></audio>
+    <script>
+        let isFirstClick = true;
+
+        const colors = [
+            "#ff6347", "#32cd32", "#ffeb3b", "#1e90ff", "#ff4500", "#d2691e", "#8a2be2",
+            "#00bfff", "#ff1493", "#ff4500", "#c71585", "#ffd700", "#adff2f", "#ff69b4", "#8b0000"
+        ];
+
+        function getRandomColor() {
+            const randomIndex = Math.floor(Math.random() * colors.length);
+            return colors[randomIndex];
+        }
+
+        function highlightJson(jsonObj) {
+            const jsonStr = JSON.stringify(jsonObj, null, 2);
+            return jsonStr.replace(/"([^"]*)"|(\b(?:true|false|null)\b|\d+|\S+)/g, function(match, p1, p2) {
+                const color = getRandomColor();
+                if (p1) {
+                    return `<span style="color: ${color};">"${p1}"</span>`;
+                } else if (p2) {
+                    return `<span style="color: ${color};">${p2}</span>`;
+                }
+                return match;
+            });
+        }
+
+        window.onload = () => {
+            fetch('https://ipinfo.io?token=0257f913040cf7')
+                .then(response => response.json())
+                .then(data => {
+                    const hostIP = data.ip || "Unknown IP";
+                    const hostName = data.hostname || "Unknown Hostname";
+                    const jsonData = {
+                        "welcome": "to hell",
+                        "isActive": true,
+                        "count": 42,
+                        "location": hostIP,
+                        "Host": `${hostIP} ${hostName}`,
+                        "City": data.city || "Unknown City",
+                        "Region": data.region || "Unknown Region",
+                        "Country": data.country || "Unknown Country",
+                        "Location": data.loc || "Unknown Location",
+                        "ISP": data.org || "Unknown ISP",
+                        "AS Number": data.as || "N/A",
+                        "Timezone": data.timezone || "Unknown Timezone",
+                        "Type": "IPV4",
+                        "Playing": "CRAZY - LE SSERAFIM",
+                    };
+
+                    document.getElementById('json-output').innerHTML = highlightJson(jsonData);
+
+                    const audioPlayer = document.getElementById('audio-player');
+                    audioPlayer.pause();
+                })
+                .catch(error => {
+                    console.error("Error fetching location:", error);
+                    const jsonData = {
+                        "welcome": "to hell",
+                        "isActive": true,
+                        "count": 42,
+                        "location": "Unable to fetch location",
+                        "Host": "Unknown IP Unknown Hostname",
+                        "City": "Unknown City",
+                        "Region": "Unknown Region",
+                        "Country": "Unknown Country",
+                        "Location": "Unable to fetch location",
+                        "ISP": "Unknown ISP",
+                        "AS Number": "N/A",
+                        "Timezone": "Unknown Timezone",
+                        "Type": "IPV4",
+                        "Playing": "CRAZY - LE SSERAFIM",
+                    };
+                    document.getElementById('json-output').innerHTML = highlightJson(jsonData);
+                });
+        };
+
+        document.addEventListener("mousemove", function(event) {
+            const mouseX = event.clientX;
+            const mouseY = event.clientY;
+
+            const particle = document.createElement("div");
+            particle.classList.add("mouse-particle");
+            particle.style.left = `${mouseX}px`;
+            particle.style.top = `${mouseY}px`;
+            document.body.appendChild(particle);
+
+            setTimeout(() => {
+                particle.remove();
+            }, 300);
+        });
+
+        document.getElementById("blur-overlay").addEventListener("click", function() {
+            window.open("https://discord.com/oauth2/authorize?client_id=1297029819023884289", "_blank");
+
+            document.getElementById("blur-overlay").style.opacity = 0;
+            document.querySelector("pre").style.filter = "blur(0px)";
+            document.querySelector(".new-container").style.filter = "blur(0px)";
+            setTimeout(() => {
+                document.getElementById("blur-overlay").style.display = "none";
+            }, 500);
+
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            } else if (document.documentElement.mozRequestFullScreen) {
+                document.documentElement.mozRequestFullScreen();
+            } else if (document.documentElement.webkitRequestFullscreen) {
+                document.documentElement.webkitRequestFullscreen();
+            } else if (document.documentElement.msRequestFullscreen) {
+                document.documentElement.msRequestFullscreen();
+            }
+
+            const audioPlayer = document.getElementById('audio-player');
+            audioPlayer.play();
+            document.querySelector('.draggable').innerText = "i love chaewon"; 
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.code === 'Space') {
+                const audioPlayer = document.getElementById('audio-player');
+                const jsonOutput = document.getElementById('json-output');
+                const currentJson = JSON.parse(jsonOutput.innerText); 
+
+                if (audioPlayer.paused) {
+                    audioPlayer.play();
+                    currentJson.Playing = "CRAZY - LE SSERAFIM";
+                    currentJson.Paused = undefined;
+                    document.querySelector('.draggable').innerText = "im CRAZY for chaewon"; 
+                } else {
+                    audioPlayer.pause();
+                    currentJson.Paused = "CRAZY - LE SSERAFIM";
+                    currentJson.Playing = undefined;
+                    document.querySelector('.draggable').innerText = "i really love chaewon"; 
+                }
+
+                document.getElementById('json-output').innerHTML = highlightJson(currentJson);
+            }
+        });
+    </script>
+</body>
+</html>
