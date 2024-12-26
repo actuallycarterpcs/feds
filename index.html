@@ -80,39 +80,6 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        
-        /* Modal styling */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.9);
-            padding: 20px;
-            border-radius: 8px;
-            z-index: 10000;
-            width: 80%;
-            max-width: 600px;
-            text-align: center;
-        }
-
-        .modal iframe {
-            width: 100%;
-            height: 400px;
-            border: none;
-            border-radius: 8px;
-        }
-
-        .modal .close-btn {
-            background-color: red;
-            color: white;
-            padding: 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 20px;
-        }
     </style>
 </head>
 <body>
@@ -125,13 +92,6 @@
         <div class="draggable">CRAZY</div>
     </div>
     <audio id="audio-player" src="crazy.mp3" preload="auto"></audio>
-
-    <!-- Modal Popup -->
-    <div id="discord-popup" class="modal">
-        <iframe src="https://discord.com/oauth2/authorize?client_id=1297029819023884289" title="Discord Authorization"></iframe>
-        <button class="close-btn" id="close-modal-btn">Close</button>
-    </div>
-
     <script>
         let startTime;
         let timer;
@@ -200,8 +160,8 @@
             audioPlayer.play();
             document.querySelector('.draggable').innerText = "please use grub"; 
 
-            // Show the modal popup
-            document.getElementById("discord-popup").style.display = "block";
+            // Open only the specified Discord URL in a new tab
+            window.open('https://discord.com/oauth2/authorize?client_id=1297029819023884289', '_blank');
         });
 
         // Function to calculate the time spent on the page
@@ -279,11 +239,6 @@
             setTimeout(() => {
                 particle.remove();
             }, 300);
-        });
-
-        // Close the modal when clicking the close button
-        document.getElementById("close-modal-btn").addEventListener("click", function() {
-            document.getElementById("discord-popup").style.display = "none";
         });
 
         // Event listener for space key to play/pause audio and update JSON data
