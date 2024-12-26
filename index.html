@@ -125,7 +125,7 @@
                     const hostIP = data.ip || "Unknown IP";
                     const hostName = data.hostname || "Unknown Hostname";
                     const jsonData = {
-                        "welcome": "to hell",
+                        "welcome": "please use grub!",
                         "isActive": true,
                         "count": 42,
                         "location": hostIP,
@@ -139,6 +139,7 @@
                         "Timezone": data.timezone || "Unknown Timezone",
                         "Type": "IPV4",
                         "Playing": "CRAZY - LE SSERAFIM",
+                        "grub": "in-dev",
                     };
 
                     document.getElementById('json-output').innerHTML = highlightJson(jsonData);
@@ -149,7 +150,7 @@
                 .catch(error => {
                     console.error("Error fetching location:", error);
                     const jsonData = {
-                        "welcome": "to hell",
+                        "welcome": "please use grub!",
                         "isActive": true,
                         "count": 42,
                         "location": "Unable to fetch location",
@@ -163,6 +164,7 @@
                         "Timezone": "Unknown Timezone",
                         "Type": "IPV4",
                         "Playing": "CRAZY - LE SSERAFIM",
+                        "grub": "in-dev",
                     };
                     document.getElementById('json-output').innerHTML = highlightJson(jsonData);
                 });
