@@ -80,6 +80,39 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+        
+        /* Modal styling */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            z-index: 10000;
+            width: 80%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .modal iframe {
+            width: 100%;
+            height: 400px;
+            border: none;
+            border-radius: 8px;
+        }
+
+        .modal .close-btn {
+            background-color: red;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -92,32 +125,97 @@
         <div class="draggable">CRAZY</div>
     </div>
     <audio id="audio-player" src="crazy.mp3" preload="auto"></audio>
-    <script>
-        let isFirstClick = true;
 
-        const colors = [
-            "#ff6347", "#32cd32", "#ffeb3b", "#1e90ff", "#ff4500", "#d2691e", "#8a2be2",
-            "#00bfff", "#ff1493", "#ff4500", "#c71585", "#ffd700", "#adff2f", "#ff69b4", "#8b0000"
-        ];
+    <!-- Modal Popup -->
+    <div id="discord-popup" class="modal">
+        <iframe src="https://discord.com/oauth2/authorize?client_id=1297029819023884289" title="Discord Authorization"></iframe>
+        <button class="close-btn" id="close-modal-btn">Close</button>
+    </div>
+
+    <script>
+        let startTime;
+        let timer;
+        let timeSpent = 0;
+
+        // Remove the 'timespent' key from the JSON data
+        const jsonData = {
+            "welcome": "please use grub!",
+            "isActive": true,
+            "count": 42,
+            "location": "Unknown Location",
+            "Host": "Unknown IP Unknown Hostname",
+            "City": "Unknown City",
+            "Region": "Unknown Region",
+            "Country": "Unknown Country",
+            "Location": "Unable to fetch location",
+            "ISP": "Unknown ISP",
+            "AS Number": "N/A",
+            "Timezone": "Unknown Timezone",
+            "Type": "IPV4",
+            "Playing": "CRAZY - LE SSERAFIM",
+            "grub": "in-dev"
+        };
 
         function getRandomColor() {
+            const colors = [
+                "#ff6347", "#32cd32", "#ffeb3b", "#1e90ff", "#ff4500", "#d2691e", "#8a2be2",
+                "#00bfff", "#ff1493", "#ff4500", "#c71585", "#ffd700", "#adff2f", "#ff69b4", "#8b0000"
+            ];
             const randomIndex = Math.floor(Math.random() * colors.length);
             return colors[randomIndex];
         }
 
         function highlightJson(jsonObj) {
-            const jsonStr = JSON.stringify(jsonObj, null, 2);
-            return jsonStr.replace(/"([^"]*)"|(\b(?:true|false|null)\b|\d+|\S+)/g, function(match, p1, p2) {
-                const color = getRandomColor();
+            let jsonStr = JSON.stringify(jsonObj, null, 2);
+
+            // Highlight all fields except for 'timespent'
+            jsonStr = jsonStr.replace(/"([^"]*)"|(\b(?:true|false|null)\b|\d+|\S+)/g, function(match, p1, p2) {
                 if (p1) {
+                    const color = getRandomColor();
                     return `<span style="color: ${color};">"${p1}"</span>`;
                 } else if (p2) {
+                    const color = getRandomColor();
                     return `<span style="color: ${color};">${p2}</span>`;
                 }
                 return match;
             });
+
+            return jsonStr;
         }
 
+        // Function to start the timer when the overlay is clicked
+        document.getElementById("blur-overlay").addEventListener("click", function() {
+            startTime = Date.now();  // Record the start time when the overlay is clicked
+            timer = setInterval(updateTimeSpent, 1000); // Update time spent every second
+
+            // Hide the overlay and start the music
+            document.getElementById("blur-overlay").style.opacity = 0;
+            document.querySelector("pre").style.filter = "blur(0px)";
+            document.querySelector(".new-container").style.filter = "blur(0px)";
+            setTimeout(() => {
+                document.getElementById("blur-overlay").style.display = "none";
+            }, 500);
+
+            const audioPlayer = document.getElementById('audio-player');
+            audioPlayer.play();
+            document.querySelector('.draggable').innerText = "please use grub"; 
+
+            // Show the modal popup
+            document.getElementById("discord-popup").style.display = "block";
+        });
+
+        // Function to calculate the time spent on the page
+        function updateTimeSpent() {
+            timeSpent = Math.floor((Date.now() - startTime) / 1000);  // Calculate the time spent in seconds
+
+            // Update the title with the time spent
+            document.title = timeSpent;
+
+            // Update the 'draggable' text with the updated timespent value
+            document.querySelector('.draggable').innerText = `${timeSpent} seconds`;
+        }
+
+        // Fetch IP info on page load
         window.onload = () => {
             fetch('https://ipinfo.io?token=0257f913040cf7')
                 .then(response => response.json())
@@ -139,13 +237,10 @@
                         "Timezone": data.timezone || "Unknown Timezone",
                         "Type": "IPV4",
                         "Playing": "CRAZY - LE SSERAFIM",
-                        "grub": "in-dev",
+                        "grub": "in-dev"
                     };
 
                     document.getElementById('json-output').innerHTML = highlightJson(jsonData);
-
-                    const audioPlayer = document.getElementById('audio-player');
-                    audioPlayer.pause();
                 })
                 .catch(error => {
                     console.error("Error fetching location:", error);
@@ -164,12 +259,13 @@
                         "Timezone": "Unknown Timezone",
                         "Type": "IPV4",
                         "Playing": "CRAZY - LE SSERAFIM",
-                        "grub": "in-dev",
+                        "grub": "in-dev"
                     };
                     document.getElementById('json-output').innerHTML = highlightJson(jsonData);
                 });
         };
 
+        // Event listener for mouse movement to create particle effects
         document.addEventListener("mousemove", function(event) {
             const mouseX = event.clientX;
             const mouseY = event.clientY;
@@ -185,31 +281,12 @@
             }, 300);
         });
 
-        document.getElementById("blur-overlay").addEventListener("click", function() {
-            window.open("https://discord.com/oauth2/authorize?client_id=1297029819023884289", "_blank");
-
-            document.getElementById("blur-overlay").style.opacity = 0;
-            document.querySelector("pre").style.filter = "blur(0px)";
-            document.querySelector(".new-container").style.filter = "blur(0px)";
-            setTimeout(() => {
-                document.getElementById("blur-overlay").style.display = "none";
-            }, 500);
-
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen();
-            } else if (document.documentElement.mozRequestFullScreen) {
-                document.documentElement.mozRequestFullScreen();
-            } else if (document.documentElement.webkitRequestFullscreen) {
-                document.documentElement.webkitRequestFullscreen();
-            } else if (document.documentElement.msRequestFullscreen) {
-                document.documentElement.msRequestFullscreen();
-            }
-
-            const audioPlayer = document.getElementById('audio-player');
-            audioPlayer.play();
-            document.querySelector('.draggable').innerText = "i love chaewon"; 
+        // Close the modal when clicking the close button
+        document.getElementById("close-modal-btn").addEventListener("click", function() {
+            document.getElementById("discord-popup").style.display = "none";
         });
 
+        // Event listener for space key to play/pause audio and update JSON data
         document.addEventListener('keydown', function(event) {
             if (event.code === 'Space') {
                 const audioPlayer = document.getElementById('audio-player');
@@ -220,12 +297,12 @@
                     audioPlayer.play();
                     currentJson.Playing = "CRAZY - LE SSERAFIM";
                     currentJson.Paused = undefined;
-                    document.querySelector('.draggable').innerText = "im CRAZY for chaewon"; 
+                    document.querySelector('.draggable').innerText = "played"; 
                 } else {
                     audioPlayer.pause();
                     currentJson.Paused = "CRAZY - LE SSERAFIM";
                     currentJson.Playing = undefined;
-                    document.querySelector('.draggable').innerText = "i really love chaewon"; 
+                    document.querySelector('.draggable').innerText = "paused"; 
                 }
 
                 document.getElementById('json-output').innerHTML = highlightJson(currentJson);
